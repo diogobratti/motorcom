@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:motorcom/about_us.dart';
 import 'package:motorcom/chat.dart';
 import 'package:motorcom/help.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Motorcom',
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('es'), // Spanish
+        Locale('pt'), // Portuguese
+      ],
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
