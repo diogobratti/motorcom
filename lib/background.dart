@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 
 class Background {
-  Future<void> initialize(BuildContext context) async {
-    final config = FlutterBackgroundAndroidConfig(
+  static Future<void> initialize(BuildContext context) async {
+    const config = FlutterBackgroundAndroidConfig(
       notificationTitle: 'flutter_background example app',
       notificationText:
           'Background notification for keeping the example app running in the background',
@@ -21,9 +21,9 @@ class Background {
           context: context,
           builder: (context) {
             return AlertDialog(
-                title: Text('Permissions needed'),
-                content: Text(
-                    'Shortly the OS will ask you for permission to execute this app in the background. This is required in order to receive chat messages when the app is not in the foreground.'),
+                title: const Text('Permissão necessária'),
+                content: const Text(
+                    'Atenção: para que o aplicativo funcione com a tela bloqueada é necessário aceitar a permissão que será apresentada após o ok.'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, 'OK'),
@@ -44,7 +44,7 @@ class Background {
     }
   }
 
-  Future<void> finish() async {
+  static Future<void> finish() async {
     await FlutterBackground.disableBackgroundExecution();
   }
 }

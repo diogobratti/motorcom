@@ -1,15 +1,16 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_background/flutter_background.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:motorcom/signaling.dart';
+import 'package:motorcom/about_us.dart';
+import 'package:motorcom/chat.dart';
+import 'package:motorcom/help.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -18,151 +19,59 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const MyMainfulWidget(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key}) : super(key: key);
+class MyMainfulWidget extends StatefulWidget {
+  const MyMainfulWidget({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyMainfulWidget> createState() => _MyMainfulWidgetState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  Signaling signaling = Signaling();
-  RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  String? roomId;
-  TextEditingController textEditingController = TextEditingController(text: '');
-  String scannedCandidates = "";
-  List<dynamic> candidates = [];
-  String udpMessage = "";
-  final config = FlutterBackgroundAndroidConfig(
-    notificationTitle: 'flutter_background example app',
-    notificationText:
-        'Background notification for keeping the example app running in the background',
-    notificationIcon: AndroidResource(name: 'background_icon'),
-    notificationImportance: AndroidNotificationImportance.Default,
-    enableWifiLock: true,
-    showBadge: true,
-  );
+class _MyMainfulWidgetState extends State<MyMainfulWidget> {
+  int _selectedIndex = 0;
+  static const List<Widget> _widgetOptions = <Widget>[
+    Chat(),
+    Help(),
+    AboutUs(),
+  ];
 
-  void addCandidate(RTCIceCandidate candidate) {
-    print('Got candidate: ${candidate.toMap()}');
-    candidates.add(candidate.toMap());
-    setState(() {});
-  }
-
-  void calleeMessage(String message) {
-    udpMessage = message;
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    _localRenderer.initialize();
-    _remoteRenderer.initialize();
-
-    signaling.onAddRemoteStream = ((stream) {
-      _remoteRenderer.srcObject = stream;
-      setState(() {});
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _localRenderer.dispose();
-    _remoteRenderer.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Motorcom"),
+        title: const Text("Motorcom"),
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 8),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            ElevatedButton(
-              onPressed: () {
-                FlutterBackground.enableBackgroundExecution();
-                signaling.openUserMedia(_localRenderer, _remoteRenderer);
-              },
-              child: Text("Open camera & microphone"),
-            ),
-            SizedBox(
-              width: 8,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await signaling.createRoom(_remoteRenderer, addCandidate);
-                // textEditingController.text = roomId!;
-                textEditingController.text = jsonEncode(candidates);
-                // candidates = roomId!;
-                setState(() {});
-              },
-              child: Text("Create room"),
-            ),
-          ]),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            SizedBox(
-              width: 8,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Add roomId
-                signaling.joinRoom(
-                  textEditingController.text.trim(),
-                  _remoteRenderer,
-                );
-              },
-              child: Text("Join room"),
-            ),
-            SizedBox(
-              width: 8,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                FlutterBackground.disableBackgroundExecution();
-                signaling.hangUp(_localRenderer);
-              },
-              child: Text("Hangup"),
-            ),
-            SizedBox(
-              width: 8,
-            ),
-          ]),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () async {},
-                child: Text("UDP $udpMessage"),
-              )
-            ],
+      body: Center(
+        child: _widgetOptions.elementAt(_selectedIndex),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.call),
+            label: 'Chat',
           ),
-          SizedBox(height: 8),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(child: RTCVideoView(_localRenderer, mirror: true)),
-                  Expanded(child: RTCVideoView(_remoteRenderer)),
-                ],
-              ),
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.help),
+            label: 'Ajuda',
           ),
-          SizedBox(height: 8)
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Autores',
+          ),
         ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }
